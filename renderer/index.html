@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Overlay</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Title bar -->
+  <div class="titlebar">
+    <span class="titlebar-title">AI Assistant</span>
+    <div class="titlebar-controls">
+      <div class="opacity-control">
+        <span class="opacity-label">透明度</span>
+        <input type="range" id="opacitySlider" min="30" max="100" value="90" class="no-drag" />
+      </div>
+      <button class="btn-minimize no-drag" id="btnMinimize" title="最小化">&#8722;</button>
+      <button class="btn-close no-drag" id="btnClose" title="关闭">&#10005;</button>
+    </div>
+  </div>
+
+  <!-- Message list -->
+  <div class="messages" id="messages"></div>
+
+  <!-- Input area -->
+  <div class="input-area">
+    <!-- Skill Picker popup: must be inside .input-area for correct absolute positioning -->
+    <ul id="skillPicker" class="skill-picker hidden">
+      <li data-skill="noun">📖 名词解释<span>输入名词，返回考试级定义</span></li>
+      <li data-skill="short">✏️ 简答题<span>输入题目，返回分点答案</span></li>
+      <li data-skill="design">🔧 设计题<span>算法/系统/程序设计题</span></li>
+      <li data-skill="calc">🔢 计算题<span>输入题目，返回完整计算过程</span></li>
+    </ul>
+    <div id="skillBadge" class="skill-badge hidden">
+      <span id="skillBadgeLabel"></span>
+      <button id="skillBadgeClear" class="no-drag">×</button>
+    </div>
+    <textarea
+      id="userInput"
+      placeholder="发送消息... (Enter 发送，/ 选择题型)"
+      rows="1"
+    ></textarea>
+    <button id="sendBtn" class="btn-send" title="发送">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </div>
+
+  <script src="../node_modules/marked/lib/marked.umd.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# 依赖
+node_modules/
+
+# API Key，绝对不能提交
+.env
+
+# 打包输出
+dist/
+out/
+
+# 系统文件
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# 编辑器
+.vscode/
+.idea/
+*.suo
+*.user
+
+# 日志
+*.log
+npm-debug.log*
