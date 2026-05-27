@@ -72,7 +72,7 @@ ipcMain.on('chat-request', async (_event, messages) => {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
+        model: 'deepseek-v4-pro',
         messages,
         stream: true,
       }),
