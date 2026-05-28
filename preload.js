@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  sendMessage: (messages) => ipcRenderer.send('chat-request', messages),
+  sendMessage: (messages, model) => ipcRenderer.send('chat-request', { messages, model }),
   onChunk: (callback) => ipcRenderer.on('chat-chunk', (_event, chunk) => callback(chunk)),
   onDone: (callback) => ipcRenderer.on('chat-done', () => callback()),
   onError: (callback) => ipcRenderer.on('chat-error', (_event, msg) => callback(msg)),

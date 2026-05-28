@@ -71,6 +71,44 @@ body {
   -webkit-app-region: no-drag;
 }
 
+/* ── Model toggle ── */
+.model-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.model-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 2px 7px;
+  line-height: 16px;
+  transition: background 0.15s, color 0.15s;
+  letter-spacing: 0.3px;
+}
+
+.model-btn:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.model-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.model-btn:not(.active):hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
 .opacity-control {
   display: flex;
   align-items: center;
@@ -102,6 +140,7 @@ body {
   cursor: pointer;
 }
 
+.btn-clear,
 .btn-minimize,
 .btn-close {
   width: 18px;
@@ -117,11 +156,13 @@ body {
   transition: color 0.15s;
 }
 
+.btn-clear    { background: var(--safe); }
 .btn-minimize { background: var(--warn); }
 .btn-close    { background: var(--danger); }
 
-.btn-minimize:hover { color: rgba(0,0,0,0.7); }
-.btn-close:hover    { color: rgba(0,0,0,0.7); }
+.btn-clear:hover,
+.btn-minimize:hover,
+.btn-close:hover { color: rgba(0,0,0,0.7); }
 
 /* ── Messages ── */
 .messages {
@@ -464,3 +505,28 @@ body {
 }
 
 .hidden { display: none !important; }
+
+/* ── Unfocused: hide chrome, show only message text ── */
+body {
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+.titlebar,
+.input-area {
+  transition: opacity 0.25s ease;
+}
+
+body.unfocused {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+body.unfocused .titlebar,
+body.unfocused .input-area {
+  opacity: 0;
+  pointer-events: none;
+}
+body.unfocused .message {
+  background: transparent;
+  border-color: transparent;
+}

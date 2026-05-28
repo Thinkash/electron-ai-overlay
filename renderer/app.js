@@ -52,8 +52,23 @@ let messages = [];
 let isStreaming = false;
 let activeSkill = null;
 let pickerIndex = 0;
+let activeModel = 'deepseek-v4-pro';
+
+// ── Model toggle ──────────────────────────────────────────────────
+document.getElementById('modelToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('.model-btn');
+  if (!btn) return;
+  activeModel = btn.dataset.model;
+  document.querySelectorAll('.model-btn').forEach((b) => {
+    b.classList.toggle('active', b === btn);
+  });
+});
 
 // ── Window controls ───────────────────────────────────────────────
+document.getElementById('btnClear').addEventListener('click', () => {
+  messages = [];
+  messagesEl.innerHTML = '';
+});
 document.getElementById('btnMinimize').addEventListener('click', () => {
   window.electronAPI.minimize();
 });
@@ -203,7 +218,7 @@ function sendMessage() {
   const payload = activeSkill
     ? [{ role: 'system', content: SKILLS[activeSkill].systemPrompt }, ...messages]
     : messages;
-  window.electronAPI.sendMessage(payload);
+  window.electronAPI.sendMessage(payload, activeModel);
 }
 
 // ── UI helpers ────────────────────────────────────────────────────
@@ -246,4 +261,11 @@ function setStreaming(state) {
 
 window.addEventListener('DOMContentLoaded', () => {
   userInput.focus();
+});
+
+window.addEventListener('blur', () => {
+  document.body.classList.add('unfocused');
+});
+window.addEventListener('focus', () => {
+  document.body.classList.remove('unfocused');
 });

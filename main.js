@@ -56,13 +56,17 @@ ipcMain.on('minimize-window', () => win && win.minimize());
 ipcMain.on('close-window', () => win && win.close());
 ipcMain.on('set-opacity', (_event, value) => win && win.setOpacity(value));
 
+const ALLOWED_MODELS = new Set(['deepseek-v4-pro', 'deepseek-v4-flash']);
+
 // IPC: DeepSeek streaming chat
-ipcMain.on('chat-request', async (_event, messages) => {
+ipcMain.on('chat-request', async (_event, { messages, model }) => {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
     win.webContents.send('chat-error', 'DEEPSEEK_API_KEY not set in .env');
     return;
   }
+
+  const safeModel = ALLOWED_MODELS.has(model) ? model : 'deepseek-v4-pro';
 
   try {
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -72,7 +76,7 @@ ipcMain.on('chat-request', async (_event, messages) => {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'deepseek-v4-pro',
+        model: safeModel,
         messages,
         stream: true,
       }),

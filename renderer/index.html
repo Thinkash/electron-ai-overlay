@@ -10,11 +10,16 @@
   <!-- Title bar -->
   <div class="titlebar">
     <span class="titlebar-title">AI Assistant</span>
+    <div class="model-toggle no-drag" id="modelToggle">
+      <button class="model-btn active" data-model="deepseek-v4-pro">Pro</button>
+      <button class="model-btn" data-model="deepseek-v4-flash">Flash</button>
+    </div>
     <div class="titlebar-controls">
       <div class="opacity-control">
         <span class="opacity-label">透明度</span>
         <input type="range" id="opacitySlider" min="30" max="100" value="90" class="no-drag" />
       </div>
+      <button class="btn-clear no-drag" id="btnClear" title="清除上下文">&#x21BA;</button>
       <button class="btn-minimize no-drag" id="btnMinimize" title="最小化">&#8722;</button>
       <button class="btn-close no-drag" id="btnClose" title="关闭">&#10005;</button>
     </div>
