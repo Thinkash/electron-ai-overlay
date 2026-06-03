@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { app, BrowserWindow, ipcMain, globalShortcut } = require('electron');
 const path = require('path');
+const fetch = require('node-fetch');
+const { HttpsProxyAgent } = require('https-proxy-agent');
 
 let win;
 
@@ -22,7 +24,7 @@ function createWindow() {
   });
 
   win.loadFile('renderer/index.html');
-  win.setMinimumSize(280, 360);
+  win.setMinimumSize(160, 200);
 }
 
 app.whenReady().then(() => {
@@ -68,19 +70,23 @@ ipcMain.on('chat-request', async (_event, { messages, model }) => {
 
   const safeModel = ALLOWED_MODELS.has(model) ? model : 'deepseek-v4-pro';
 
+  const proxyUrl = process.env.HTTPS_PROXY;
+  const fetchOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: safeModel,
+      messages,
+      stream: true,
+    }),
+  };
+  if (proxyUrl) fetchOptions.agent = new HttpsProxyAgent(proxyUrl);
+
   try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: safeModel,
-        messages,
-        stream: true,
-      }),
-    });
+    const response = await fetch('https://api.deepseek.com/chat/completions', fetchOptions);
 
     if (!response.ok) {
       const errText = await response.text();
@@ -88,36 +94,38 @@ ipcMain.on('chat-request', async (_event, { messages, model }) => {
       return;
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    let buffer = '';
+    await new Promise((resolve, reject) => {
+      let buffer = '';
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+      response.body.setEncoding('utf-8');
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep incomplete last line
+      response.body.on('data', (chunk) => {
+        buffer += chunk;
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
 
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed === 'data: [DONE]') continue;
-        if (!trimmed.startsWith('data: ')) continue;
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed === 'data: [DONE]') continue;
+          if (!trimmed.startsWith('data: ')) continue;
 
-        try {
-          const json = JSON.parse(trimmed.slice(6));
-          const content = json.choices?.[0]?.delta?.content;
-          if (content) {
-            win.webContents.send('chat-chunk', content);
+          try {
+            const json = JSON.parse(trimmed.slice(6));
+            const content = json.choices?.[0]?.delta?.content;
+            if (content) win.webContents.send('chat-chunk', content);
+          } catch {
+            // malformed chunk, skip
           }
-        } catch {
-          // malformed chunk, skip
         }
-      }
-    }
+      });
 
-    win.webContents.send('chat-done');
+      response.body.on('end', () => {
+        win.webContents.send('chat-done');
+        resolve();
+      });
+
+      response.body.on('error', reject);
+    });
   } catch (err) {
     win.webContents.send('chat-error', err.message);
   }
